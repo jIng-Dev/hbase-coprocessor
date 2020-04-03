@@ -24,11 +24,8 @@ public class CnamRegionObserver implements RegionObserver {
 	public void postPut(ObserverContext<RegionCoprocessorEnvironment> c, Put put, WALEdit edit, Durability durability)
 			throws IOException {
 
-//		if(!edit.isMetaEdit()&&c.getEnvironment().getRegionInfo().getTable().getNameAsString().equals("table")) {
-//			System.err.println("GET REGION ROW EMPTY:"+edit.isEmpty()+ " | REPLAY |"+edit.isReplay()+" ||| "+new String(put.getRow())+" ||| "+edit.getRowForRegion(c.getEnvironment().getRegionInfo()).length);
 		List<Cell> cells = put.get(Bytes.toBytes("cf"), "col".getBytes());
 		for (Cell cell : cells) {
-//				System.out.println("METAFAMILY:"+new String(cell.getFamilyArray())+" ___ "+new String(cell.getValueArray())+" ___ "+cell.getType().name()+" ___ ");
 			MY_FUTURE.whenComplete((value, error) -> {
 				if (error != null) {
 					error.printStackTrace();
@@ -42,10 +39,8 @@ public class CnamRegionObserver implements RegionObserver {
 				}
 
 				MY_FUTURE.complete(KafkaSendCommand.getInstance().sendRecord(new String(cell.getValueArray())));
-//							;new String(c.getRowArray()));
 			});
 			t.start();
-//			}
 		}
 		RegionObserver.super.postPut(c, put, edit, durability);
 	}
